@@ -20,7 +20,15 @@ namespace CheckUpdate
 			HtmlWeb web = new HtmlWeb();
 			HtmlDocument document = web.Load("https://github.com/KylloxStudio/Durango_V2/tags");
 			HtmlNode h4Node = document.DocumentNode.SelectSingleNode("//h4[@class='flex-auto min-width-0 pr-2 pb-1 commit-title']");
+			if (h4Node == null)
+			{
+				return;
+			}
 			HtmlNode aNode = h4Node.SelectSingleNode("a");
+			if (aNode == null)
+			{
+				return;
+			}
 
 			string[] version = aNode.InnerText.Split(new char[]
 			{
