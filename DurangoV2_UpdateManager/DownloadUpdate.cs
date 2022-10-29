@@ -32,6 +32,7 @@ namespace DownloadUpdate
 
 			string downloadPath = string.Empty;
 			string localPath = string.Empty;
+			string pastFileName = string.Empty;
 			string fileName = string.Empty;
 			bool foundUpdate = false;
 			bool isDownloading = false;
@@ -42,7 +43,11 @@ namespace DownloadUpdate
 			{
 				if (isDownloading)
 				{
-					Console.Write("\"{0}\": Downloading... ", fileName);
+					if (pastFileName != fileName)
+					{
+						pastFileName = fileName;
+						Console.Write("\"{0}\": Downloading... ", fileName);
+					}
 				}
 			};
 			webClient.DownloadFileCompleted += (s, e) =>
@@ -57,39 +62,44 @@ namespace DownloadUpdate
 					}
 				}
 				Console.WriteLine("Completed.");
-				Thread.Sleep(500);
+				Thread.Sleep(50);
 				isDownloading = false;
 			};
 
 			Console.Title = "DownloadUpdate_DurangoV2 - Updating...";
 			SetCloseButtonEnabled(consoleWindowHandle, false);
 
-			string address = "http://durangomanager.000webhostapp.com/client/isUpdateEtc.txt";
+			string address = "http://durangomanager.kyllox.studio/client/isUpdateEtc.txt";
 			string txt = new StreamReader(webClient.OpenRead(address)).ReadToEnd();
 			bool isUpdateEtc = bool.Parse(txt);
 			int downloadCount = 3;
+			string path = Directory.GetParent(Directory.GetParent(Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location).FullName).FullName).FullName;
 			if (isUpdateEtc)
 				downloadCount = 6;
 
 			for (int i = 0; i < downloadCount; i++)
 			{
+				while (isDownloading)
+				{
+				}
+				string name = string.Empty;
 				if (i == 0)
 				{
 					downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/Managed/Assembly-CSharp.dll?raw=true";
-					localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\Managed\\Assembly-CSharp.dll";
-					fileName = "Assembly-CSharp.dll";
+					localPath = path + "\\Managed\\Assembly-CSharp.dll";
+					name = "Assembly-CSharp.dll";
 				}
 				else if (i == 1)
 				{
 					downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/resources.assets?raw=true";
-					localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\resources.assets";
-					fileName = "resources.assets";
+					localPath = path + "\\resources.assets";
+					name = "resources.assets";
 				}
 				else if (i == 2)
 				{
 					downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/version.txt?raw=true";
-					localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\version.txt";
-					fileName = "version.txt";
+					localPath = path + "\\version.txt";
+					name = "version.txt";
 				}
 
 				if (downloadCount > 3)
@@ -97,20 +107,20 @@ namespace DownloadUpdate
 					if (i == 3)
 					{
 						downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/StreamingAssets/Movie/PC/title.mp4?raw=true";
-						localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\StreamingAssets\\Movie\\PC\\title.mp4";
-						fileName = "title.mp4";
+						localPath = path + "\\StreamingAssets\\Movie\\PC\\title.mp4";
+						name = "title.mp4";
 					}
 					else if (i == 4)
 					{
 						downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/StreamingAssets/Movie/PC/warping.mp4?raw=true";
-						localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\StreamingAssets\\Movie\\PC\\warping.mp4";
-						fileName = "warping.mp4";
+						localPath = path + "\\StreamingAssets\\Movie\\PC\\warping.mp4";
+						name = "warping.mp4";
 					}
 					else if (i == 5)
 					{
 						downloadPath = "https://github.com/KylloxStudio/Durango_V2/blob/main/DurangoV2_Data/StreamingAssets/Audio/GeneratedSoundBanks/Windows/title.bnk?raw=true";
-						localPath = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\StreamingAssets\\Audio\\GeneratedSoundBanks\\Windows\\title.bnk";
-						fileName = "title.bnk";
+						localPath = path + "\\StreamingAssets\\Audio\\GeneratedSoundBanks\\Windows\\title.bnk";
+						name = "title.bnk";
 					}
 				}
 
@@ -127,6 +137,7 @@ namespace DownloadUpdate
 						{
 						}
 						webClient.DownloadFileAsync(new Uri(downloadPath), localPath);
+						fileName = name;
 						isDownloading = true;
 					}
 					response.Close();
@@ -142,13 +153,8 @@ namespace DownloadUpdate
 			}
 
 			Console.Title = "DownloadUpdate_DurangoV2";
+			SetCloseButtonEnabled(consoleWindowHandle, true);
 
-			while (webClient.IsBusy)
-			{
-			}
-			while (isDownloading)
-			{
-			}
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine("All Files Update Completed.");
@@ -164,7 +170,7 @@ namespace DownloadUpdate
 					string input = Console.ReadLine();
 					if (input == "Y" || input == "y")
 					{
-						Process.Start("https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/KylloxStudio/Durango_V2/tree/main/DurangoV2_Data/DownloadUpdate");
+						Process.Start("https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/KylloxStudio/Durango_V2/tree/main/DurangoV2_Data/Programs/UpdateManager");
 						isOpenedUrl = true;
 						break;
 					}
@@ -174,17 +180,44 @@ namespace DownloadUpdate
 					}
 				}
 			}
+			else
+            {
+				Console.WriteLine("Press any key to restart the game.");
+				Console.ReadKey();
+			}
 
+			string path2 = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\FoundUpdate.txt";
+			File.Delete(path2);
 			foreach (Process process in Process.GetProcesses())
 			{
-				if (process.ProcessName.StartsWith("DurangoV2"))
+				if (process.ProcessName.IndexOf("UpdateManager") == -1 && process.ProcessName.IndexOf("DurangoV2") != -1)
 				{
 					process.Kill();
 					break;
 				}
+				else
+                {
+					Console.WriteLine("Cannot Found exe file.");
+					break;
+                }
 			}
+
 			if (!isOpenedUrl)
-				Process.Start(Directory.GetCurrentDirectory() + "\\DurangoV2.exe");
+			{
+				foreach (Process process in Process.GetProcesses())
+				{
+					if (process.ProcessName.IndexOf("UpdateManager") == -1 && process.ProcessName.IndexOf("DurangoV2") != -1)
+					{
+						process.Start();
+						break;
+					}
+					else
+					{
+						Console.WriteLine("Cannot Found exe file.");
+						break;
+					}
+				}
+			}
 		}
 
 		private static void SetCloseButtonEnabled(IntPtr windowHandle, bool enabled)

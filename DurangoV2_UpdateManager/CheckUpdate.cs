@@ -10,7 +10,8 @@ namespace CheckUpdate
 	{
 		public static bool FoundUpdate;
 		public static double CurrentVersion;
-		public static double LastVersion;
+		public static double LatestVersion;
+		public static bool Error;
 
 		static void Main(string[] args)
 		{
@@ -25,32 +26,55 @@ namespace CheckUpdate
 			{
 				'v'
 			});
-			LastVersion = double.Parse(version[1]);
+			LatestVersion = double.Parse(version[1]);
 
-			string path = Directory.GetCurrentDirectory() + "\\DurangoV2_Data\\version.txt";
-			Console.WriteLine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
+			string path = Directory.GetParent(Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName + "\\version.txt";
 
 			if (new FileInfo(path).Exists)
 			{
 				string txt = File.ReadAllText(path);
-				CurrentVersion = double.Parse(txt);
+				if (double.TryParse(txt, out double ver))
+					CurrentVersion = ver;
 			}
 			else
 			{
+				Error = true;
 				Console.WriteLine("Error: Cannot Found 'version.txt' File.");
-				Console.ReadKey();
-				return;
+				foreach (Process process in Process.GetProcesses())
+				{
+					if (process.ProcessName.StartsWith("DurangoV2_UpdateManager"))
+					{
+						process.Kill();
+					}
+				}
 			}
 
-			if (CurrentVersion < LastVersion)
-				FoundUpdate = true;
+			if (!Error)
+			{
+				if (CurrentVersion < LatestVersion)
+					FoundUpdate = true;
 
-			Console.WriteLine("Found Update: " + FoundUpdate.ToString());
-			Console.WriteLine("Current Version: " + string.Format("{0:0.0}", CurrentVersion));
-			Console.WriteLine("Last Version: " + string.Format("{0:0.0}", LastVersion));
+				Console.WriteLine("Found Update: " + FoundUpdate.ToString());
+				Console.WriteLine("Current Version: " + string.Format("{0:0.0}", CurrentVersion));
+				Console.WriteLine("Latest Version: " + string.Format("{0:0.0}", LatestVersion));
+				Console.WriteLine();
+			}
 
-			if (FoundUpdate)
-				DownloadUpdate.Program.Update();
+			if (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) == Directory.GetCurrentDirectory())
+			{
+				if (FoundUpdate)
+					DownloadUpdate.Program.Update();
+			}
+			else
+            {
+				string path2 = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\FoundUpdate.txt";
+				if (new FileInfo(path2).Exists)
+				{
+					string txt = File.ReadAllText(path2);
+					if (FoundUpdate && txt.IndexOf("True") != -1)
+						DownloadUpdate.Program.Update();
+				}
+			}
 		}
 	}
 }
