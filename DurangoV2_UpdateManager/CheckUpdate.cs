@@ -20,39 +20,36 @@ namespace CheckUpdate
 			HtmlWeb web = new HtmlWeb();
 			HtmlDocument document = web.Load("https://github.com/KylloxStudio/Durango_V2/tags");
 			HtmlNode h4Node = document.DocumentNode.SelectSingleNode("//h4[@class='flex-auto min-width-0 pr-2 pb-1 commit-title']");
-			if (h4Node == null)
+			if (h4Node != null)
 			{
-				return;
-			}
-			HtmlNode aNode = h4Node.SelectSingleNode("a");
-			if (aNode == null)
-			{
-				return;
-			}
-
-			string[] version = aNode.InnerText.Split(new char[]
-			{
-				'v'
-			});
-			LatestVersion = double.Parse(version[1]);
-
-			string path = Directory.GetParent(Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName + "\\version.txt";
-
-			if (new FileInfo(path).Exists)
-			{
-				string txt = File.ReadAllText(path);
-				if (double.TryParse(txt, out double ver))
-					CurrentVersion = ver;
-			}
-			else
-			{
-				Error = true;
-				Console.WriteLine("Error: Cannot Found 'version.txt' File.");
-				foreach (Process process in Process.GetProcesses())
+				HtmlNode aNode = h4Node.SelectSingleNode("a");
+				if (aNode != null)
 				{
-					if (process.ProcessName.StartsWith("DurangoV2_UpdateManager"))
+					string[] version = aNode.InnerText.Split(new char[]
 					{
-						process.Kill();
+						'v'
+					});
+					LatestVersion = double.Parse(version[1]);
+
+					string path = Directory.GetParent(Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName + "\\version.txt";
+
+					if (new FileInfo(path).Exists)
+					{
+						string txt = File.ReadAllText(path);
+						if (double.TryParse(txt, out double ver))
+							CurrentVersion = ver;
+					}
+					else
+					{
+						Error = true;
+						Console.WriteLine("Error: Cannot Found 'version.txt' File.");
+						foreach (Process process in Process.GetProcesses())
+						{
+							if (process.ProcessName.StartsWith("DurangoV2_UpdateManager"))
+							{
+								process.Kill();
+							}
+						}
 					}
 				}
 			}
