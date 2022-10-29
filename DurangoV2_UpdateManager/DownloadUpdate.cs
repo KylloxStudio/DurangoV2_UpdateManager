@@ -69,7 +69,7 @@ namespace DownloadUpdate
 			Console.Title = "DownloadUpdate_DurangoV2 - Updating...";
 			SetCloseButtonEnabled(consoleWindowHandle, false);
 
-			string address = "http://durangomanager.kyllox.studio/client/isUpdateEtc.txt";
+			string address = "https://durangomanager.000webhostapp.com/client/isUpdateEtc.txt";
 			string txt = new StreamReader(webClient.OpenRead(address)).ReadToEnd();
 			bool isUpdateEtc = bool.Parse(txt);
 			int downloadCount = 3;
